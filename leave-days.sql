@@ -1,4 +1,5 @@
 drop table if exists request_leave, users, leave_type;
+
 CREATE TABLE users
 (
     id serial PRIMARY KEY,
@@ -48,5 +49,5 @@ CREATE TABLE request_leave
 )
 
 
-SELECT * FROM request_leave;
+-- SELECT * FROM request_leave;
 

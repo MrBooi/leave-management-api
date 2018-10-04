@@ -11,8 +11,6 @@ CREATE TABLE users
     joined_date TIMESTAMP NOT NULL 
 );
 
-SELECT *
-FROM users;
 
 CREATE TABLE leave_type
 (
@@ -25,8 +23,26 @@ CREATE TABLE leave_type
     -- paid_leave int DEFAULT 17
 );
 
-SELECT *
-FROM leave_type;
+
+
+
+
+CREATE TABLE leave_status
+(
+  id serial PRIMARY KEY,
+  leave_status text DEFAULT 'Pending'
+);
+
+CREATE TABLE user_leave_allowed
+(
+    id serial PRIMARY KEY,
+    user_id int not null,
+    leave_type_id int not null,
+    leave_amount int not null,
+    foreign key (user_id) references users(id),
+    foreign key (leave_type_id) references leave_type(id)
+);
+
 
 CREATE TABLE leave_request
 (
@@ -37,25 +53,10 @@ CREATE TABLE leave_request
     start_date date not null,
     end_date date not null,
     status_id int not NULL,
-    foreign key (leave_type_id ) references request_leave(id),
+    foreign key (leave_type_id ) references leave_type(id),
     foreign key (user_id) references users(id),
     foreign key (status_id) references leave_status(id)
-)
-
-CREATE TABLE leave_status(
-  id serial PRIMARY KEY,
-  status text DEFAULT 'Pending'
-)
-
-CREATE TABLE user_leave_allowed(
-    id serial PRIMARY KEY,
-    user_id int not null,
-    leave_type_id int not null,
-    leave_amount int not null,
-    foreign key (user_id) references users(id),
-    foreign key (leave_type_id) references leave_type(id)
-)
-
+);
 
 
 

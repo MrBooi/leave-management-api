@@ -1,6 +1,14 @@
- module.exports = user = (pool) => {
+import loginErrors from '../validation/login';
+
+module.exports = user = (pool) => {
 
     const login = async ({email,password})=>{
+        let loginData ={email,password};
+        let error = loginErrors(loginData);
+         if (!error.isValid) {
+             return error.errors;
+         }
+         
         let login = await pool.query('SELECT * FROM users WHERE email=$1 and user_password=$2 '
           ,[email,password]);
           if(login.rowCount==0){

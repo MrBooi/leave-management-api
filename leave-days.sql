@@ -8,7 +8,7 @@ CREATE TABLE users
     position text not NULL,
     email text UNIQUE NOT NULL,
     user_password text Not NULL,
-    joined_date TIMESTAMP NOT NULL 
+    joined_date DATE NOT NULL DEFAULT CURRENT_DATE
 );
 
 
@@ -16,11 +16,6 @@ CREATE TABLE leave_type
 (
     id serial PRIMARY KEY,
      leave_type  text NOT NULL
-     
-    -- Study_leave int DEFAULT 5,
-    -- unpaid_leave int DEFAULT 10,
-    -- family_responsibility int DEFAULT 3,
-    -- paid_leave int DEFAULT 17
 );
 
 

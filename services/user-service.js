@@ -1,7 +1,7 @@
  module.exports = user = (pool) => {
 
     const login = async ({email,password})=>{
-        let login = await pool.query('SELECT * FROM users WHERE email=$1 and PASS_WORD=$2 '
+        let login = await pool.query('SELECT * FROM users WHERE email=$1 and user_password=$2 '
           ,[email,password]);
           if(login.rowCount==0){
               return false;
@@ -26,7 +26,7 @@
          if (alreadyExist) {
              return 'email already exist';
          }
-         await pool.query(`INSERT INTO users (first_name,last_name,position,email,PASS_WORD)
+         await pool.query(`INSERT INTO users (first_name,last_name,position,email,user_password)
           VALUES ($1,$2,$3,$4,$5)`,[first_name,last_name,position,email,password]
          )
     

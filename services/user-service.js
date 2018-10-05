@@ -1,4 +1,4 @@
-import loginErrors from '../validation/login';
+const loginErrors = require('../validation/login');
 
 module.exports = user = (pool) => {
 

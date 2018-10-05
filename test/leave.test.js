@@ -21,9 +21,10 @@ let user_service = UserService(pool);
 
 describe('The adding new user function', () => {
     beforeEach(async () => {
-        //     // await pool.query('DELETE FROM request_leave');
-        await pool.query('DELETE FROM users');
-        //     await pool.query('DELETE FROM leave_type');
+    await pool.query('DELETE FROM user_leave_allowed');
+    await pool.query('DELETE FROM leave_request');
+    await pool.query('DELETE FROM users');
+    await pool.query('DELETE FROM leave_type');
     });
     it('should add new users', async () => {
         let params = {
@@ -45,9 +46,10 @@ describe('The adding new user function', () => {
 
 describe('The login  function', () => {
     beforeEach(async () => {
-        //     await pool.query('DELETE FROM request_leave');
+        await pool.query('DELETE FROM user_leave_allowed');
+        await pool.query('DELETE FROM leave_request');
         await pool.query('DELETE FROM users');
-        //     await pool.query('DELETE FROM leave_type');
+        await pool.query('DELETE FROM leave_type');
     });
     it('should login if users already exist', async () => {
         let params = {
@@ -64,7 +66,7 @@ describe('The login  function', () => {
             password: '123'
         }
         let login = await user_service.login(loginDetails);
-
+          console.log(login);
         assert.equal(login, true);
     });
 });
@@ -72,9 +74,10 @@ describe('The login  function', () => {
 
 describe('The check if users already exist  function', () => {
     beforeEach(async () => {
-        //     await pool.query('DELETE FROM request_leave');
+        await pool.query('DELETE FROM user_leave_allowed');
+        await pool.query('DELETE FROM leave_request');
         await pool.query('DELETE FROM users');
-        //     await pool.query('DELETE FROM leave_type');
+        await pool.query('DELETE FROM leave_type');
         let params = {
             first_name: 'Siba',
             last_name: 'Qamata',
@@ -95,7 +98,7 @@ describe('The check if users already exist  function', () => {
             password2: '1234'
         }
         let reject = await user_service.createUser(params);
-
+           
 
         assert.equal(reject, 'email already exist');
     });

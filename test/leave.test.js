@@ -177,7 +177,7 @@ describe('user should apply for a leave', () => {
          let params={
             email:'siba@gmail.com',
             leaveType: 'sick leave',
-            description: 'not well to day',
+            description: 'not well today',
             start_date: '2018-10-04',
             end_date: '2018-10-06'
          }
@@ -189,7 +189,85 @@ describe('user should apply for a leave', () => {
 });
 
 
+describe('Manager should able to change leave status', () => {
+    beforeEach(async () => {
+        await pool.query('DELETE FROM user_leave_allowed');
+        await pool.query('DELETE FROM leave_request');
+        await pool.query('DELETE FROM users');
+        let params = {
+            first_name: 'Siba',
+            last_name: 'Qamata',
+            position: 'Fullstack dev',
+            email: 'siba@gmail.com',
+            password: '1234',
+            password2: '1234'
+        }
+        await user_service.createUser(params);
+        let user_id = await user_service.find_user_id('siba@gmail.com');
+         await user_service.addLeaveAmount(user_id);
 
+         let params1={
+            email:'siba@gmail.com',
+            leaveType: 'sick leave',
+            description: 'not well today',
+            start_date: '2018-10-04',
+            end_date: '2018-10-06'
+         }
+         await request_service.applyForALeave(params1);
+         
+    });
+    it('should update a leave', async () => {
+         let leave_id = await request_service.request_leave();
+         let updateLeave ={
+             id: leave_id[0].id,
+             status: 'Approved'
+         }
+
+         let update_status = await request_service.updateLeaveStatus(updateLeave)
+
+        assert.equal(update_status,'leave succefully set to Approved')
+    });
+});
+
+describe('user should able to cancel a leave', () => {
+    beforeEach(async () => {
+        await pool.query('DELETE FROM user_leave_allowed');
+        await pool.query('DELETE FROM leave_request');
+        await pool.query('DELETE FROM users');
+        let params = {
+            first_name: 'Siba',
+            last_name: 'Qamata',
+            position: 'Fullstack dev',
+            email: 'siba@gmail.com',
+            password: '1234',
+            password2: '1234'
+        }
+        await user_service.createUser(params);
+        let user_id = await user_service.find_user_id('siba@gmail.com');
+         await user_service.addLeaveAmount(user_id);
+
+         let params1={
+            email:'siba@gmail.com',
+            leaveType: 'sick leave',
+            description: 'not well today',
+            start_date: '2018-10-04',
+            end_date: '2018-10-06'
+         }
+         await request_service.applyForALeave(params1);
+         
+    });
+    it('should update a leave', async () => {
+         let leave_id = await request_service.request_leave();
+         let updateLeave ={
+             id: leave_id[0].id,
+             status: 'Canceled'
+         }
+
+         let update_status = await request_service.updateLeaveStatus(updateLeave)
+
+        assert.equal(update_status,'leave succefully set to Canceled')
+    });
+});
 
 
 after(async () => {

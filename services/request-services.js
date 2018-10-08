@@ -78,12 +78,34 @@ module.exports =request_leave =(pool) =>{
     return foundUser.rows[0].id;
  }
 
- const updateLeaveStatus = async (status,id)=>{
-    await pool.query('UPDATE status request_leave SET status=$1 WHERE id=$2'
-    ,[status,id]);
+ const updateLeaveStatus = async ({id,status})=>{
+    let id_status = await status_id(status);
+   
+    let checkLeave =  await pool.query('SELECT * FROM leave_request WHERE id=$1',[id]);
+     if (checkLeave.rowCount===0) {
+        return 'opps invalid leave';
+     }  
+     if(status ==='Rejected'|| status==='Canceled'){
+      let {leave_type_id,user_id,start_date,end_date} = checkLeave.rows[0];
+       let leavedays = leave_days(start_date,end_date);
+      await pool.query(`UPDATE user_leave_allowed 
+             SET leave_amount=(leave_amount+$1) WHERE user_id=$2 AND leave_type_id=$3`
+             ,[leavedays,user_id,leave_type_id])
+     }
+     await pool.query('UPDATE  leave_request SET status_id=($1) WHERE id=$2'
+    ,[id_status,id]);
 
     return `leave succefully set to ${status}`;
  }
+
+
+ const request_leave = async () =>{
+  let leave = await pool.query('SELECT * FROM leave_request');
+
+  return leave.rows
+ }
+ 
+ 
 
  
 
@@ -91,7 +113,9 @@ return{
  applyForALeave,
  updateLeaveStatus,
  leaveId,
- leave_days
+ leave_days,
+ status_id,
+ request_leave
 }
 
 }

@@ -1,11 +1,9 @@
 const loginErrors = require('../validation/login');
+let bcrypt = require('bcryptjs');
 
 module.exports = user = (pool) => {
-
-    const login = async ({
-        email,
-        password
-    }) => {
+   
+    const login = async ({email, password}) => {
         let loginData = {
             email,
             password
@@ -15,11 +13,18 @@ module.exports = user = (pool) => {
             return error.errors;
         }
 
-        let login = await pool.query('SELECT * FROM users WHERE email=$1 and user_password=$2 ', [email, password]);
+        let login = await pool.query('SELECT * FROM users WHERE email=$1', [email]);
         if (login.rowCount == 0) {
             return false;
         }
-        return true;
+        const {user_password} = login.rows[0];
+
+         if (!decrytPass(password,user_password)) {
+             return false
+         }
+         return true;
+
+  
     }
 
     const findEmail = async (email) => {
@@ -44,21 +49,23 @@ module.exports = user = (pool) => {
 
         if (alreadyExist) {
             return 'email already exist';
-        }
+        }   
+         const hash = encrytPass(password);
         await pool.query(`INSERT INTO users (first_name,last_name,position,email,user_password)
-          VALUES ($1,$2,$3,$4,$5)`, [first_name, last_name, position, email, password])
+          VALUES ($1,$2,$3,$4,$5)`, [first_name, last_name, position, email, hash])
           
         return 'users is successfuly added';
     }
 
     const encrytPass = (password) => {
-        let hash = '';
+        let salt = bcrypt.genSaltSync(10);
+        let hash = bcrypt.hashSync(password, salt);
         return hash
     }
 
-    const decrytPass = (password) => {
-        let originalPassword = ''
-        return originalPassword
+    const decrytPass = (password,hash) => {
+     let correctPass = bcrypt.compareSync(password, hash); 
+       return correctPass;
     }
 
     const addLeaveAmount = async (userid) => {

@@ -9,6 +9,7 @@ node_js:
 before_script:
   - psql -c 'create database leave_days_test;' -U postgres
   - psql -U postgres -d leave_days_test -a -f leave-days.sql
+  - psql -U postgres -d leave_days_test -a -f insert.sql
 
 addons:
   ? apt

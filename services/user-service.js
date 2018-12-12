@@ -1,4 +1,5 @@
 const loginErrors = require('../validation/login');
+const registerErrors = require('../validation/register');
 let bcrypt = require('bcryptjs');
 
 module.exports = user = (pool) => {
@@ -8,23 +9,35 @@ module.exports = user = (pool) => {
             email,
             password
         };
+        
         let error = loginErrors(loginData);
         if (!error.isValid) {
-            return error.errors;
+    
+            return {
+                success:false,
+                data:  error
+            }
+           
         }
-
-        let login = await pool.query('SELECT * FROM users WHERE email=$1', [email]);
-        if (login.rowCount == 0) {
-            return false;
+        let findUser = await pool.query('SELECT * FROM users WHERE email=$1',[email]);
+        
+        if (findUser.rowCount === 0) {
+            console.log(error.errors.password);
+            return {
+                success: false,
+                data:  error.errors.password ='Email or Password is Incorrect'
+            };
         }
-        const {user_password} = login.rows[0];
+        const {user_password} = findUser.rows[0];
 
          if (!decrytPass(password,user_password)) {
-             return false
+             return error.errors.password ='Email or Password is Incorrect';
          }
-         return true;
 
-  
+         return {
+            success: true,
+              data :findUser.rows
+         }
     }
 
     const findEmail = async (email) => {
@@ -32,29 +45,40 @@ module.exports = user = (pool) => {
         if (foundUser.rowCount == 0) {
             return false;
         } 
-        
         return true;
     }
 
     const createUser = async (params) => {
-        const {
-            first_name,
-            last_name,
-            position,
-            email,
-            password,
-            password2
-        } = params
+        const { first_name,last_name,position,email,password,password2} = params
+       
+        const error = registerErrors(params);
+          if(!error.isValid){
+            return {
+                success:false,
+                data:  error
+            }
+          }
+          
+       
         let alreadyExist = await findEmail(email);
-
         if (alreadyExist) {
-            return 'email already exist';
+            return  {
+                success :false,
+                data: error.errors.email = 'email already exist'
+            }
         }   
          const hash = encrytPass(password);
-        await pool.query(`INSERT INTO users (first_name,last_name,position,email,user_password)
+          await pool.query(`INSERT INTO users (first_name,last_name,position,email,user_password)
           VALUES ($1,$2,$3,$4,$5)`, [first_name, last_name, position, email, hash])
           
-        return 'users is successfuly added';
+          let userData = await find_user_id(email);
+            await addLeaveAmount(userData)
+
+        return {
+            success:true,
+            data: userData
+        }
+            
     }
 
     const encrytPass = (password) => {
@@ -74,7 +98,7 @@ module.exports = user = (pool) => {
          const {leave_type, amount} = currect_type;
          const leave_type_id = await find_leavetype_id(leave_type);
           if(leave_type_id <0){
-          return 'leave type is not found';
+          return false;
           }
 
        await pool.query(`INSERT INTO user_leave_allowed
@@ -82,7 +106,7 @@ module.exports = user = (pool) => {
         VALUES ($1,$2,$3)`,[userid,leave_type_id,amount]);
     }
 
-     return 'Leave amount is successfully added';
+     return true;
     }
     
     const leave_amount =() => {
@@ -113,7 +137,6 @@ module.exports = user = (pool) => {
         return user_id.rows[0].id;
     }
 
-
     const find_leavetype_id= async (leave_type) =>{
      let find_id = await pool.query('SELECT id from leave_type WHERE leave_type=$1',[leave_type]);
      if (find_id.rowCount===0) {
@@ -121,11 +144,28 @@ module.exports = user = (pool) => {
       } 
       return find_id.rows[0].id;
     }
+
+    const user_leaves = async (user_id)=>{
+     let userLeave = await pool.query(`select leave_request.id,first_name,last_name,leave_description,
+     leave_type,leave_status from 
+     users JOIN leave_request ON leave_request.user_id=users.id JOIN 
+     leave_type ON leave_type.id=leave_request.leave_type_id JOIN leave_status ON 
+     leave_status.id=leave_request.status_id WHERE leave_request.user_id=$1`,[user_id]);
+  
+      if (userLeave.rowCount===0) {
+          return {success:false,
+                }
+      }
+        return {success:true,
+               data:userLeave.rows
+             }
+    }
     
     return {
         login,
         createUser,
         addLeaveAmount,
-        find_user_id
+        find_user_id,
+        user_leaves
     }
 }

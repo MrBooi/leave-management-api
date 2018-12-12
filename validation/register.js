@@ -3,32 +3,40 @@ const isEmpty = require('./is-empty');
 
 module.exports = function validateRegisterInput(data) {
   let errors = {};
-
-  data.userName = !isEmpty(data.userName) ? data.userName : '';
-  data.fullName = !isEmpty(data.fullName) ? data.fullName : '';
-  data.userType = !isEmpty(data.userType) ? data.userType : '';
+  data. first_name = !isEmpty(data. first_name) ? data. first_name : '';
+  data.last_name = !isEmpty(data.last_name) ? data.last_name : '';
+  data.position = !isEmpty(data.position) ? data.position : '';
+  data.email = !isEmpty(data.email) ? data.email : '';
   data.password = !isEmpty(data.password) ? data.password : '';
   data.password2 = !isEmpty(data.password2) ? data.password2 : '';
 
-  if (!Validator.isLength(data.userName, {
+  if (!Validator.isLength(data.last_name, {
       min: 2,
       max: 30
     })) {
-    errors.userName = 'Username must be between 2 and 30 characters';
+    errors.last_name = 'Last Name must be between 2 and 30 characters';
   }
-  if (!Validator.isLength(data.fullName, {
+  if (!Validator.isLength(data.first_name, {
       min: 2,
       max: 30
     })) {
-    errors.userName = 'Fullname must be between 2 and 30 characters';
+    errors.first_name = 'First Name must be between 2 and 30 characters';
   }
 
-  if (Validator.isEmpty(data.userName)) {
-    errors.userName = 'Username field is required';
+  if (Validator.isEmpty(data.first_name)) {
+    errors.first_name = 'Full Name field is required';
   }
 
-  if (Validator.isEmpty(data.fullName)) {
-    errors.fullName = 'Fullname field is required';
+  if (Validator.isEmpty(data.last_name)) {
+    errors.first_name = 'Last Name field is required';
+  }
+
+  if (Validator.isEmpty(data.position)) {
+    errors.position = 'Position field is required';
+  }
+
+  if (Validator.isEmpty(data.email)) {
+    errors.email = 'Email field is required';
   }
 
 
